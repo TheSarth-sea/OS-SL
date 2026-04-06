@@ -406,17 +406,22 @@ body::before {
   margin-left: 22px;
   padding-left: 8px;
   border-left: 1px solid rgba(255,255,255,0.07);
-  overflow: visible;
+  overflow: hidden;
   transition: max-height var(--transition-std), opacity var(--transition-std);
 }
 
 .tree-children.collapsed {
   max-height: 0 !important;
   opacity: 0;
+  overflow: hidden;
 }
 
 .tree-children.expanded {
+  /* No max-height cap — content must flow freely, especially when
+     mounted subtree injects nodes dynamically after initial render. */
+  max-height: 9999px !important;
   opacity: 1;
+  overflow: visible;
 }
 
 /* ---------- Badge for mount point ---------- */
