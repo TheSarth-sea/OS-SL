@@ -439,7 +439,7 @@ function mountDevice() {
 
     const mountPointChildren = document.getElementById('children-mnt-usb');
     if (mountPointChildren) {
-      mountPointChildren.style.maxHeight = '800px';
+      mountPointChildren.style.maxHeight = '3000px';
       mountPointChildren.classList.remove('collapsed');
       mountPointChildren.classList.add('expanded');
       const toggle = mountRow?.querySelector('.tree-toggle');
