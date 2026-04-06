@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File System Mount Visualizer — OS Concepts</title>
+  <meta name="description" content="Interactive visualization demonstrating how an external device's file system is mounted to a directory in the host OS file system. Ideal for learning operating systems concepts." />
+  <meta name="keywords" content="file system, mount, operating systems, linux, visualization, OS concepts" />
+
+  <!-- Google Fonts preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE HEADER
+  ════════════════════════════════════════════ -->
+  <header class="page-header" role="banner">
+    <h1>🗂️ File System Mount Visualizer</h1>
+    <p>See how an external device becomes part of your host file system — interactively.</p>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       FLOW BANNER  (Host FS → Mount Point → Device)
+  ════════════════════════════════════════════ -->
+  <div class="flow-banner" id="flow-banner" role="status" aria-live="polite">
+    <span class="segment seg-host">🖥️ Host File System</span>
+    <span class="arrow">→</span>
+    <span class="segment seg-mount">🔌 /mnt/usb</span>
+    <span class="arrow">→</span>
+    <span class="segment seg-device">💾 External Device</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CANVAS — Three-column layout
+       [Host FS]  [Connector]  [Device FS]
+  ════════════════════════════════════════════ -->
+  <main class="canvas" role="main" aria-label="File system visualization">
+
+    <!-- SVG overlay for mount line animation -->
+    <svg
+      id="mount-svg"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <!-- Animated bezier curve connecting device to mount point -->
+      <path id="mount-line" class="mount-line" d="" />
+      <!-- Glowing dot that travels along the line -->
+      <circle id="mount-dot" class="mount-pulse-dot" r="5" cx="0" cy="0" />
+    </svg>
+
+    <!-- ─── LEFT PANEL: Host File System ─── -->
+    <section
+      class="panel panel-host"
+      id="panel-host"
+      aria-label="Host File System"
+    >
+      <div class="panel-header">
+        <span class="panel-icon" style="color: #4f8ef7;">🖥️</span>
+        <div>
+          <div class="panel-title" style="color: #4f8ef7;">Host File System</div>
+          <div class="panel-subtitle">Linux · ext4</div>
+        </div>
+      </div>
+
+      <!-- Tree renders here dynamically -->
+      <div
+        class="tree"
+        id="host-tree"
+        role="tree"
+        aria-label="Host file system directory tree"
+      ></div>
+    </section>
+
+    <!-- ─── CENTER: Connector indicator ─── -->
+    <div class="connector-zone" role="img" aria-label="USB connection status">
+      <div
+        class="usb-connector"
+        id="usb-connector"
+        title="USB / External Storage"
+      >🔗</div>
+      <div class="connector-label" id="connector-label">Disconnected</div>
+    </div>
+
+    <!-- ─── RIGHT PANEL: External Device ─── -->
+    <section
+      class="panel panel-device"
+      id="panel-device"
+      aria-label="External USB Device File System"
+    >
+      <div class="panel-header">
+        <span class="panel-icon" style="color: #06d6a0;">💾</span>
+        <div>
+          <div class="panel-title" style="color: #06d6a0;">External Device</div>
+          <div class="panel-subtitle">USB Drive · FAT32 · 16 GB</div>
+        </div>
+      </div>
+
+      <!-- Device filesystem tree renders here -->
+      <div
+        class="tree"
+        id="device-tree"
+        role="tree"
+        aria-label="External device directory tree"
+      ></div>
+
+      <!-- Device path label -->
+      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.07);">
+        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">
+          Block device: <span style="color: var(--accent-cyan);">/dev/sdb1</span>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-top: 3px;">
+          UUID: <span style="color: var(--text-secondary);">a3f2-b91c</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       CONTROL BUTTONS
+  ════════════════════════════════════════════ -->
+  <div class="controls" role="toolbar" aria-label="Mount controls">
+
+    <button
+      class="btn btn-mount"
+      id="btn-mount"
+      aria-label="Mount the external device to /mnt/usb"
+      title="Attach the external device filesystem to /mnt/usb"
+    >
+      <span class="btn-icon">⬆️</span>
+      Mount Device
+    </button>
+
+    <button
+      class="btn btn-unmount"
+      id="btn-unmount"
+      disabled
+      aria-label="Unmount the external device from /mnt/usb"
+      title="Safely detach the external device filesystem"
+    >
+      <span class="btn-icon">⬇️</span>
+      Unmount Device
+    </button>
+
+    <button
+      class="btn btn-reset"
+      id="btn-reset"
+      aria-label="Reset the visualization to initial state"
+      title="Reset everything to the starting state"
+    >
+      <span class="btn-icon">🔄</span>
+      Reset
+    </button>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STATUS BAR
+  ════════════════════════════════════════════ -->
+  <div
+    class="status-bar"
+    role="status"
+    aria-live="polite"
+    aria-label="Mount operation status"
+  >
+    <div class="status-dot idle" id="status-dot"></div>
+    <span class="status-prompt">kernel&nbsp;$&nbsp;</span>
+    <span class="status-label" id="status-label">Ready</span>
+    <span id="status-msg" style="color: var(--text-secondary); margin-left: 6px;"></span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       LEGEND
+  ════════════════════════════════════════════ -->
+  <nav class="legend" aria-label="Color legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #4f8ef7;"></div>
+      <span>Host File System</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #f77f4f;"></div>
+      <span>Mount Point  (/mnt/usb)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #06d6a0;"></div>
+      <span>External Device</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #00d4ff;"></div>
+      <span>Mount Connection</span>
+    </div>
+  </nav>
+
+  <!-- Main application script -->
+  <script src="script.js"></script>
+</body>
+</html>
