@@ -223,9 +223,7 @@ function renderNode(node, depth = 0, opts = {}) {
     children.className = 'tree-children' + (isExpanded ? ' expanded' : ' collapsed');
     children.id = `children-${node.id}`;
 
-    // Calculate max-height for animation
-    const childCount = countDescendants(node);
-    children.style.maxHeight = isExpanded ? `${childCount * 40 + 100}px` : '0px';
+    // CSS .tree-children.expanded handles max-height via 9999px, no inline override needed
 
     if (node.children) {
       node.children.forEach((child, i) => {
@@ -279,8 +277,7 @@ function toggleNode(nodeId, childrenEl, toggleEl) {
     State.expandedNodes.add(nodeId);
     childrenEl.classList.remove('collapsed');
     childrenEl.classList.add('expanded');
-    const childCount = childrenEl.children.length;
-    childrenEl.style.maxHeight = `${childCount * 40 + 200}px`;
+    // max-height is handled by CSS class (.expanded = 9999px, .collapsed = 0)
     toggleEl.classList.add('open');
   }
 }
@@ -439,7 +436,7 @@ function mountDevice() {
 
     const mountPointChildren = document.getElementById('children-mnt-usb');
     if (mountPointChildren) {
-      mountPointChildren.style.maxHeight = '3000px';
+      // CSS .expanded class sets max-height: 9999px — no inline override needed
       mountPointChildren.classList.remove('collapsed');
       mountPointChildren.classList.add('expanded');
       const toggle = mountRow?.querySelector('.tree-toggle');
