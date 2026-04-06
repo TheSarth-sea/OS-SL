@@ -201,7 +201,16 @@ body::before {
   padding: 20px;
   transition: box-shadow var(--transition-std), border-color var(--transition-std);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+}
+
+/* Host panel gets a scrollable area so mounted files are reachable */
+.panel-host {
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
 }
 
 .panel::before {
@@ -397,7 +406,7 @@ body::before {
   margin-left: 22px;
   padding-left: 8px;
   border-left: 1px solid rgba(255,255,255,0.07);
-  overflow: hidden;
+  overflow: visible;
   transition: max-height var(--transition-std), opacity var(--transition-std);
 }
 
@@ -450,7 +459,7 @@ body::before {
   padding-left: 8px;
   border-left: 2px solid rgba(6, 214, 160, 0.35);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   max-height: 0;
   opacity: 0;
   transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
@@ -459,7 +468,7 @@ body::before {
 
 #mounted-subtree.show-mounted {
   display: block !important;
-  max-height: 600px;
+  max-height: 2000px;
   opacity: 1;
 }
 
