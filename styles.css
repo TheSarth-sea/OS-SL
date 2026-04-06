@@ -454,22 +454,30 @@ body::before {
 
 /* ---------- Mounted device subtree ---------- */
 #mounted-subtree {
-  display: none;
-  margin-left: 22px;
+  /* No extra margin-left: it already sits inside .tree-children which
+     provides the 22px indent. Adding more causes double-indentation overlap. */
+  margin-left: 0;
   padding-left: 8px;
   border-left: 2px solid rgba(6, 214, 160, 0.35);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   max-height: 0;
   opacity: 0;
+  /* Use visibility so the element is present in the DOM for transitions
+     but doesn't take up space or capture clicks when hidden */
+  visibility: hidden;
   transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity    0.6s cubic-bezier(0.4, 0, 0.2, 1);
+              opacity    0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0.6s;
 }
 
 #mounted-subtree.show-mounted {
-  display: block !important;
   max-height: 2000px;
   opacity: 1;
+  visibility: visible;
+  transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity    0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0s;
 }
 
 #mounted-subtree::before {
