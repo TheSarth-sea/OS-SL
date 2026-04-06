@@ -451,10 +451,12 @@ function mountDevice() {
   setTimeout(() => {
     const sub = document.getElementById('mounted-subtree');
     if (sub) {
-      sub.style.display = 'block';
       renderMountedSubtree();
+      // Small rAF delay so browser registers the content before animating in
       requestAnimationFrame(() => {
-        sub.classList.add('show-mounted');
+        requestAnimationFrame(() => {
+          sub.classList.add('show-mounted');
+        });
       });
     }
 
@@ -489,7 +491,7 @@ function unmountDevice() {
   // Step 1: Clear mount line
   clearMountLine();
 
-  // Step 2: Collapse mounted subtree
+  // Step 2: Collapse mounted subtree (CSS transition handles the hide animation)
   setTimeout(() => {
     const sub = document.getElementById('mounted-subtree');
     if (sub) sub.classList.remove('show-mounted');
@@ -501,12 +503,11 @@ function unmountDevice() {
     if (mountRow) mountRow.classList.remove('device-mounted');
   }, 500);
 
-  // Step 4: Clear subtree contents, restore device panel
+  // Step 4: Clear subtree contents after transition completes, restore device panel
   setTimeout(() => {
     const sub = document.getElementById('mounted-subtree');
     if (sub) {
       sub.innerHTML = '';
-      sub.style.display = 'none';
     }
 
     const devicePanel = DOM.panelDevice();
@@ -538,7 +539,7 @@ function resetVisualization() {
     clearMountLine();
 
     const sub = document.getElementById('mounted-subtree');
-    if (sub) { sub.classList.remove('show-mounted'); sub.innerHTML = ''; sub.style.display = 'none'; }
+    if (sub) { sub.classList.remove('show-mounted'); sub.innerHTML = ''; }
 
     const mountRow = document.getElementById('row-mnt-usb');
     if (mountRow) mountRow.classList.remove('device-mounted');
